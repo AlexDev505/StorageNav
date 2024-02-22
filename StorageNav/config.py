@@ -81,7 +81,6 @@ class ConfigSection:
 class Base(ConfigSection):
     root_dir: str
     version: str
-    run_web_app: bool = False
 
     required_fields = ["root_dir", "version"]
     section_name = ""
@@ -102,15 +101,17 @@ class Logging(ConfigSection):
 
 @dataclass
 class TgBot(ConfigSection):
+    enabled: bool
     token: str
     webhook: TgBotWebhook
 
-    required_field = ["token"]
+    required_field = ["enabled", "token"]
 
 
 @dataclass
 class TgBotWebhook(ConfigSection):
     host: str
+    enabled: bool = False
     secret_key: str = ""
 
     if int(os.environ.get("RUN_WEB_APP") or "0"):
@@ -120,6 +121,13 @@ class TgBotWebhook(ConfigSection):
         if not self.secret_key:
             self.secret_key = os.getenv("TG_BOT_TOKEN")
         super(TgBotWebhook, self).__post_init__()
+
+
+@dataclass
+class WebApp(ConfigSection):
+    enabled: bool
+
+    required_fields = ["enabled"]
 
 
 @dataclass
@@ -134,6 +142,7 @@ class Config(ConfigSection):
     base: Base
     logger: Logging
     tg_bot: TgBot
+    web_app: WebApp
     storage: Storage
 
 
